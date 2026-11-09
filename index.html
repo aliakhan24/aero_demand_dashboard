@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aero Services Demand Dashboard | UER vs DMR Coverage (Synthetic Demo)</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#1b2733;--mut:#5f6b7a;--line:#e1e6ec;--navy:#0f2540;--blue:#0072B2;--orange:#E69F00;--sky:#56B4E9;--green:#009E73;--verm:#D55E00;--purple:#CC79A7;--red:#d64545;--amber:#e8a33d;--ok:#2e9e6b}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45}
+header.top{background:var(--navy);color:#fff;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 24px 6px;flex-wrap:wrap}
+h1{margin:0;font-size:20px;letter-spacing:.2px}
+.sub{margin:2px 0 0;color:#b9c7d8;font-size:12.5px}
+.meta{display:flex;gap:10px;align-items:center;font-size:12px;color:#b9c7d8}
+.badge{background:var(--orange);color:#1b1b1b;font-weight:700;padding:3px 9px;border-radius:12px;font-size:11.5px}
+.filters{display:flex;flex-wrap:wrap;gap:12px 16px;padding:6px 24px 10px;align-items:flex-end}
+.filters label{display:flex;flex-direction:column;font-size:11px;color:#b9c7d8;gap:3px;text-transform:uppercase;letter-spacing:.5px}
+.filters select,.filters button{font-size:13px;padding:6px 8px;border-radius:6px;border:1px solid #3b5575;background:#1a3556;color:#fff;min-width:120px}
+.filters input[type=range]{width:160px;accent-color:var(--orange)}
+.filters button{cursor:pointer;background:var(--orange);color:#111;font-weight:700;border:none;min-width:80px}
+.tabs{display:flex;gap:4px;padding:0 24px;flex-wrap:wrap}
+.tabs button{background:transparent;border:none;color:#b9c7d8;padding:9px 16px;font-size:13.5px;cursor:pointer;border-bottom:3px solid transparent;font-weight:600}
+.tabs button.on{color:#fff;border-color:var(--orange)}
+main{padding:16px 24px 30px;max-width:1500px;margin:0 auto}
+.how{background:#e8f1f9;border-left:4px solid var(--blue);padding:9px 14px;border-radius:6px;margin-bottom:14px;font-size:13px;color:#24415e}
+.tab{display:none}.tab.on{display:block}
+.grid{display:grid;gap:14px;margin-bottom:14px}
+.g5{grid-template-columns:repeat(5,1fr)}.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g21{grid-template-columns:2fr 1fr}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:0 1px 2px rgba(15,37,64,.05);min-width:0}
+.card h3{margin:0 0 2px;font-size:14.5px;line-height:1.35}
+.card .note{color:var(--mut);font-size:12px;margin:0 0 8px}
+.kpi{cursor:help;border-top:4px solid var(--blue)}
+.kpi .kl{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--mut)}
+.kpi .kv{font-size:32px;font-weight:700;margin:2px 0}
+.kpi .ks{font-size:12px;color:var(--mut)}
+.i{display:inline-block;width:14px;height:14px;border-radius:50%;background:#cfd8e3;color:#fff;font-size:10px;text-align:center;line-height:14px;margin-left:3px;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--mut);margin-bottom:4px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+svg{display:block;max-width:100%}
+svg .ax{font-size:11px;fill:#5f6b7a}
+svg .vl{font-size:11px;fill:#1b2733;font-weight:600}
+svg [data-tip]:hover{opacity:.8}
+.tw{max-height:380px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid #edf0f4;white-space:nowrap}
+th{position:sticky;top:0;background:#eef2f6;cursor:pointer;user-select:none;font-size:12px;z-index:1}
+td.n,th.n{text-align:right}
+.rb{background:linear-gradient(90deg,rgba(214,69,69,.35) var(--w),transparent var(--w));padding:2px 6px;border-radius:3px;font-variant-numeric:tabular-nums}
+.pill{padding:2px 8px;border-radius:10px;font-size:11.5px;font-weight:600}
+.p-a{background:#d6e9f6;color:#0b4f78}.p-u{background:#fbe8bf;color:#7a5200}.p-b{background:#f6d2c1;color:#8a3200}
+.hm td,.hm th{text-align:center;cursor:default;position:static;border:2px solid #fff}
+.hm th{background:#fff}
+.hm td.rl{text-align:left;font-weight:600;background:#fff}
+.verdict{border-radius:10px;padding:14px 18px;margin-bottom:14px;font-weight:600;font-size:15.5px;border-left:8px solid}
+.v-ok{background:#e3f4ea;border-color:var(--ok);color:#14623e}.v-bad{background:#fdeaea;border-color:var(--red);color:#8d1f1f}.v-mid{background:#fff3dc;border-color:var(--amber);color:#7a5200}
+.track{height:22px;background:#e8ecf1;border-radius:11px;overflow:hidden;margin:8px 0 4px}
+.fill{height:100%}
+.empty{background:#fff;border:2px dashed #c7d0db;border-radius:10px;padding:40px;text-align:center;color:var(--mut);font-size:15px}
+.find{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.find:last-child{border:none}
+.find .num{min-width:92px;font-size:22px;font-weight:700;color:var(--blue)}
+.find b{display:block}
+.find span{color:var(--mut);font-size:13px}
+.btn{background:var(--blue);color:#fff;border:none;padding:7px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px}
+ul.chk{list-style:none;padding:0;margin:0}
+ul.chk li{padding:4px 0;border-bottom:1px solid #f0f2f5;font-size:13px}
+.ok{color:var(--ok);font-weight:700}.bad{color:var(--red);font-weight:700}
+.defs dt{font-weight:700;margin-top:8px}.defs dd{margin:2px 0 0;color:#33414f}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:14px;border-top:1px solid var(--line);background:#fff}
+#tip{position:fixed;pointer-events:none;background:#14263d;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;max-width:320px;display:none;z-index:99;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+@media(max-width:1100px){.g5{grid-template-columns:repeat(2,1fr)}.g2,.g3,.g21{grid-template-columns:1fr}}
+@media(max-width:900px){header.top{position:static}main{padding:12px}}
+@media print{header.top{position:static}.tab{display:block!important}.filters,.tabs,.btn{display:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div>
+      <h1>Aero Services Demand Dashboard</h1>
+      <p class="sub">UER risk vs DMR demand-prediction coverage · aeroderivative gas turbine fleet</p>
+    </div>
+    <div class="meta"><span class="badge">SYNTHETIC DEMO DATA</span><span>Last refreshed: <b id="ts"></b></span></div>
+  </div>
+  <div class="filters">
+    <label>Technology<select id="fTech"></select></label>
+    <label>Region<select id="fReg"></select></label>
+    <label>Status in DMR<select id="fStat"></select></label>
+    <label>Execution Year<select id="fYear"></select></label>
+    <label>High-risk threshold: &gt; <b id="thrv" style="color:#fff">50</b><input type="range" id="fThr" min="0" max="95" step="1" value="50"></label>
+    <label>DMR predicted after year<select id="fPred"></select></label>
+    <label>&nbsp;<button id="reset">Reset</button></label>
+  </div>
+  <nav class="tabs">
+    <button class="on" data-tab="t1">1 · High-Risk Engines</button>
+    <button data-tab="t2">2 · Module Coverage: UER vs DMR</button>
+    <button data-tab="t3">3 · Insights &amp; Method</button>
+  </nav>
+</header>
+
+<main>
+  <div class="how"><b>How to read this:</b> Tab 1 shows which engines the UER flags as high risk and whether the DMR already acts on them. Tab 2 checks whether the DMR forecast covers the specific modules the UER says are at risk. All filters apply to every tab; the verdicts and titles update with them.</div>
+
+  <section class="tab on" id="t1"></section>
+  <section class="tab" id="t2"></section>
+  <section class="tab" id="t3"></section>
+</main>
+
+<footer>Data anonymized. ESNs and customer identifiers replaced. All values in this demo are synthetic (randomly generated) and mirror only the structure of the source workbook.</footer>
+<div id="tip"></div>
+
+<script>
+(function(){
+"use strict";
+/* ============================ SYNTHETIC DATA ============================ */
+function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const R=rng(20250611);
+function wp(items,w){let r=R()*w.reduce((a,b)=>a+b,0);for(let i=0;i<items.length;i++){r-=w[i];if(r<=0)return items[i];}return items[items.length-1];}
+
+const UER_MODS=['HPT','HPC','COM','LPC','LPT','BUS','VAR','REST','HAR','NOZ','CAS','IPT','PT'];
+const DMR_COLS=['ENG','Comb','S1N','Hptr','S2N','Hpcr','Igb','Igv','Booster','Lpcs','LPT','IPT Frame','IPT Midshaft'];
+const MAP={HPT:'Hptr',HPC:'Hpcr',COM:'Comb',LPC:'Booster',LPT:'LPT',VAR:'Igv',IPT:'IPT Frame'};
+const REV={};Object.keys(MAP).forEach(k=>REV[MAP[k]]=k);
+const REGIONS=['Americas','EMEA','APAC','LatAm','MENA'];
+const EE_TYPES=['Hot Section Repair','Major Overhaul','Engine Exchange','Module Repair'];
+const NOEE='No Upcoming EE';
+
+const RAW=[];const N=220;
+for(let i=0;i<N;i++){
+  const id=String(i).padStart(5,'0');
+  const fam=R()<.68?'LM6000':'LM2500';
+  const sub=fam==='LM6000'?wp(['LM6000 PC','LM6000 PD','LM6000 PF1','LM6000 PG'],[.4,.25,.2,.15]):wp(['LM2500 Plus','LM2500 Base','LM2500 Plus G4'],[.4,.35,.25]);
+  const region=wp(REGIONS,[.3,.25,.22,.13,.10]);
+  const hs=R()<.62;
+  const risk=Math.round((hs?50.5+R()*49:3+R()*47)*100)/100;
+  const sev=hs?5+Math.floor(R()*6):1+Math.floor(R()*6);
+  const ovr=Math.round(Math.min(.99,Math.max(.05,risk/100*(.85+R()*.2)))*100)/100;
+  const nY=hs?1+Math.floor(R()*4):(R()<.4?1:0);
+  const pool=UER_MODS.slice();
+  for(let j=pool.length-1;j>0;j--){const k=Math.floor(R()*(j+1));[pool[j],pool[k]]=[pool[k],pool[j]];}
+  const yes=pool.slice(0,nY);const mods={};UER_MODS.forEach(m=>mods[m]=yes.indexOf(m)>-1);
+  const status=hs?wp(['WIP',"Ship'd",'Planned','Not populated'],[.14,.10,.22,.54]):wp(['WIP',"Ship'd",'Planned','Not populated'],[.05,.04,.10,.81]);
+  const ee=R()<(hs?.45:.12)?EE_TYPES[Math.floor(R()*EE_TYPES.length)]:NOEE;
+  const year=wp([2025,2026,2027,2028,2029,2030],[.08,.20,.22,.20,.17,.13]);
+  RAW.push({id,fam,sub,region,risk,sev,ovr,cond:1,mods,top:nY?yes[0]:'Not populated',status,ee,year,
+    cust:'Customer '+String(1+Math.floor(R()*60)).padStart(3,'0')});
+}
+for(let k=0;k<6;k++){const s=RAW[Math.floor(R()*N)];RAW.push(Object.assign({},s,{risk:Math.round(s.risk*.9*100)/100}));}
+const dm=new Map();RAW.forEach(r=>{const o=dm.get(r.id);if(!o||r.risk>o.risk)dm.set(r.id,r);});
+const UERU=Array.from(dm.values());
+
+const DMR=[];const DMRBY={};
+UERU.forEach(e=>{
+  const a=e.status==='WIP'||e.status==="Ship'd",u=e.ee!==NOEE;
+  const p=(a||u)?.85:(e.risk>50?.2:.1);
+  if(R()<p){
+    const nr=R()<.2?2:1;
+    for(let r=0;r<nr;r++){
+      const fb=wp(['Fcst','Bklg','Prospect'],[.55,.37,.08]);
+      const yr=Math.min(2030,Math.max(2025,R()<.72?e.year:e.year+(R()<.5?-1:1)));
+      const cells={};
+      DMR_COLS.forEach(c=>{const um=REV[c];const pp=um?(e.mods[um]?.68:.07):.1;cells[c]=R()<pp?(R()<.62?'Repair':'Rotable'):'';});
+      const row={id:e.id,tech:e.sub,year:yr,fb,dc:fb==='Fcst'?'2.0 Fcst (Base/ Oppty)':fb==='Bklg'?'3.0 Bklg':'1.0 Prospect',cells};
+      DMR.push(row);(DMRBY[e.id]=DMRBY[e.id]||[]).push(row);
+    }
+  }
+});
+
+/* ============================ HELPERS ============================ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pct=(a,b)=>b?Math.round(a/b*1000)/10:0;
+const fmtN=n=>Number.isInteger(n)?String(n):n.toFixed(1);
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(Math.max(x,1e-9))));const f=x/p;const nf=f<=1?1:f<=2?2:f<=5?5:10;return Math.max(1,nf*p);}
+const C_BLUE='#0072B2',C_OR='#E69F00',C_SKY='#56B4E9',C_GR='#009E73',C_VM='#D55E00',C_PU='#CC79A7';
+function cc(p){if(p===null)return '#f0f2f5';return p<40?'#f5b5b0':p<70?'#fbe0a6':'#b5e3c8';}
+function legend(items){return '<div class="legend">'+items.map(i=>`<span><i style="background:${i[1]}"></i>${esc(i[0])}</span>`).join('')+'</div>';}
+function card(title,body,note,cls){return `<div class="card ${cls||''}"><h3>${title}</h3>${note?`<p class="note">${note}</p>`:''}${body}</div>`;}
+
+function vbar(o){
+  const W=640,H=o.h||290,m={l:44,r:o.line?48:14,t:o.topLabels?28:14,b:34};
+  const iw=W-m.l-m.r,ih=H-m.t-m.b,n=o.labels.length,S=o.series.length;
+  let mv=1;
+  if(o.stacked){for(let i=0;i<n;i++){mv=Math.max(mv,o.series.reduce((a,s)=>a+s.values[i],0));}}
+  else mv=Math.max(1,...o.series.flatMap(s=>s.values));
+  const step=niceStep(mv/4),max=step*4;
+  let g='';
+  for(let t=0;t<=4;t++){const y=m.t+ih-ih*t/4;g+=`<line x1="${m.l}" x2="${W-m.r}" y1="${y}" y2="${y}" stroke="#e6eaef"/><text x="${m.l-6}" y="${y+4}" text-anchor="end" class="ax">${fmtN(step*t)}</text>`;}
+  const gw=iw/n,bw=o.stacked?Math.min(46,gw*.8):Math.min(34,gw*.76/S);
+  o.labels.forEach((lab,i)=>{
+    const cx=m.l+gw*i+gw/2;let acc=0;
+    o.series.forEach((s,k)=>{
+      const v=s.values[i],h=ih*v/max;
+      if(o.stacked){const y=m.t+ih-acc-h;if(v>0)g+=`<rect x="${cx-bw/2}" y="${y}" width="${bw}" height="${h}" fill="${s.color}" data-tip="${esc(lab+' · '+s.name+': '+v)}"/>`;acc+=h;}
+      else{const x=cx-(S*bw)/2+k*bw;g+=`<rect x="${x}" y="${m.t+ih-h}" width="${bw-2}" height="${h}" fill="${s.color}" rx="2" data-tip="${esc(lab+' · '+s.name+': '+v)}"/>`;
+        if(o.valLabels&&v>0)g+=`<text x="${x+(bw-2)/2}" y="${m.t+ih-h-4}" text-anchor="middle" class="ax">${v}</text>`;}
+    });
+    g+=`<text x="${cx}" y="${H-m.b+16}" text-anchor="middle" class="ax">${esc(lab)}</text>`;
+    if(o.topLabels)g+=`<text x="${cx}" y="${m.t-10}" text-anchor="middle" class="vl">${esc(o.topLabels[i])}</text>`;
+  });
+  if(o.vline!==undefined){const x=m.l+iw*o.vline/100;g+=`<line x1="${x}" x2="${x}" y1="${m.t}" y2="${m.t+ih}" stroke="#111" stroke-width="2" stroke-dasharray="5 4"/><text x="${x+5}" y="${m.t+11}" class="vl">Threshold &gt; ${o.vline}</text>`;}
+  if(o.line){
+    const lm=o.line.max||niceStep(Math.max(1,...o.line.values)/4)*4;
+    const pts=o.line.values.map((v,i)=>[m.l+gw*i+gw/2,m.t+ih-ih*v/lm]);
+    g+=`<path d="${pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ')}" fill="none" stroke="${o.line.color}" stroke-width="2.5"/>`;
+    pts.forEach((p,i)=>g+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="#fff" stroke="${o.line.color}" stroke-width="2" data-tip="${esc(o.labels[i]+' · '+o.line.name+': '+o.line.values[i]+(o.line.suffix||''))}"/>`);
+    for(let t=0;t<=4;t++){const y=m.t+ih-ih*t/4;g+=`<text x="${W-m.r+6}" y="${y+4}" class="ax">${fmtN(lm*t/4)}${o.line.suffix||''}</text>`;}
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+
+function hbar(o){
+  const rh=o.rh||30,lw=o.lw||140,W=640,H=o.labels.length*rh+8;
+  const max=Math.max(1,...o.values);let g='';
+  o.labels.forEach((lab,i)=>{
+    const y=i*rh+4,w=(W-lw-90)*o.values[i]/max;
+    g+=`<text x="${lw-8}" y="${y+rh/2+3}" text-anchor="end" class="ax" style="font-size:12px">${esc(lab)}</text>`;
+    g+=`<rect x="${lw}" y="${y+3}" width="${Math.max(w,o.values[i]>0?2:0)}" height="${rh-8}" rx="3" fill="${o.colors?o.colors[i]:(o.color||C_BLUE)}" data-tip="${esc(o.tips?o.tips[i]:lab+': '+o.values[i])}"/>`;
+    g+=`<text x="${lw+w+6}" y="${y+rh/2+3}" class="vl">${esc(o.vt?o.vt[i]:o.values[i])}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${g}</svg>`;
+}
+
+function donut(parts,centerTop,centerSub){
+  const tot=parts.reduce((a,p)=>a+p.v,0);const r=62,Cc=2*Math.PI*r;let acc=0,g='';
+  g+=`<circle cx="100" cy="100" r="${r}" fill="none" stroke="#eef1f5" stroke-width="28"/>`;
+  parts.forEach(p=>{if(!p.v)return;const len=Cc*p.v/tot;
+    g+=`<circle cx="100" cy="100" r="${r}" fill="none" stroke="${p.color}" stroke-width="28" stroke-dasharray="${len} ${Cc-len}" stroke-dashoffset="${-acc}" transform="rotate(-90 100 100)" data-tip="${esc(p.name+': '+p.v+' ('+pct(p.v,tot)+'%)')}"/>`;acc+=len;});
+  g+=`<text x="100" y="102" text-anchor="middle" style="font-size:26px;font-weight:700;fill:#1b2733">${centerTop}</text><text x="100" y="120" text-anchor="middle" class="ax">${centerSub}</text>`;
+  return `<svg viewBox="0 0 200 200" style="max-width:230px;margin:0 auto" role="img">${g}</svg>`;
+}
+
+const SORT={t1:{k:'risk',d:-1},t2:{k:'id',d:1},t3:{k:'risk',d:-1}};
+function tableHTML(key,cols,rows){
+  const s=SORT[key];
+  const sorted=rows.slice().sort((a,b)=>{const x=a[s.k],y=b[s.k];return(typeof x==='number'&&typeof y==='number'?x-y:String(x).localeCompare(String(y)))*s.d;});
+  const head=cols.map(c=>`<th class="${c.n?'n':''}" data-tbl="${key}" data-k="${c.k}">${c.t}${s.k===c.k?(s.d>0?' ▲':' ▼'):''}</th>`).join('');
+  const body=sorted.map(r=>'<tr>'+cols.map(c=>`<td class="${c.n?'n':''}">${c.r?c.r(r):esc(r[c.k])}</td>`).join('')+'</tr>').join('');
+  return `<div class="tw"><table><thead><tr>${head}</tr></thead><tbody>${body||'<tr><td colspan="'+cols.length+'" style="text-align:center;color:#5f6b7a">No rows</td></tr>'}</tbody></table></div><p class="note" style="margin-top:6px">${rows.length} row(s). Click a column header to sort.</p>`;
+}
+const riskCell=r=>`<div class="rb" style="--w:${r.risk}%">${r.risk.toFixed(2)}</div>`;
+const segCell=r=>r.seg==='Actioned'?'<span class="pill p-a">Actioned</span>':r.seg==='Upcoming event'?'<span class="pill p-u">Upcoming event</span>':'<span class="pill p-b">Blind spot</span>';
+
+/* ============================ STATE & COMPUTE ============================ */
+const state={tech:'All',region:'All',status:'All',year:'All',thr:50,pred:2026};
+let LAST=null;
+
+function compute(){
+  const f=state;
+  const eng=UERU.filter(e=>(f.tech==='All'||e.fam===f.tech)&&(f.region==='All'||e.region===f.region)&&(f.status==='All'||e.status===f.status)&&(f.year==='All'||String(e.year)===f.year));
+  eng.forEach(e=>{e.hi=e.risk>f.thr;e.act=e.status==='WIP'||e.status==="Ship'd";e.up=e.ee!==NOEE;e.seg=e.act?'Actioned':e.up?'Upcoming event':'Blind spot';});
+  const hi=eng.filter(e=>e.hi);
+  const C={eng,hi};
+  C.act=hi.filter(e=>e.act);C.wip=C.act.filter(e=>e.status==='WIP').length;C.ship=C.act.length-C.wip;
+  C.notAct=hi.filter(e=>!e.act);C.upNot=C.notAct.filter(e=>e.up);C.upAll=hi.filter(e=>e.up);
+  C.blind=C.notAct.filter(e=>!e.up);
+  C.years=Array.from(new Set(eng.map(e=>e.year))).sort();
+  C.yr=C.years.map(y=>{const h=hi.filter(e=>e.year===y);return{y,a:h.filter(e=>e.act).length,u:h.filter(e=>!e.act&&e.up).length,b:h.filter(e=>!e.act&&!e.up).length,t:h.length};});
+  /* module coverage */
+  const MM=UER_MODS.filter(m=>MAP[m]);
+  const cv={MM,atRisk:{},pred:{},cov:{},yr:{},rep:0,rot:0,fc:0,bk:0,unc:[],unm:{}};
+  MM.forEach(m=>{cv.atRisk[m]=0;cv.pred[m]=0;cv.cov[m]=0;});
+  C.years.forEach(y=>cv.yr[y]={a:0,p:0,c:0,m:{}});
+  UER_MODS.filter(m=>!MAP[m]).forEach(m=>cv.unm[m]=hi.filter(e=>e.mods[m]).length);
+  hi.forEach(e=>{
+    const rows=DMRBY[e.id]||[];
+    MM.forEach(m=>{
+      const col=MAP[m];
+      const q=rows.filter(r=>r.year>f.pred&&(r.fb==='Fcst'||r.fb==='Bklg')&&(r.cells[col]==='Repair'||r.cells[col]==='Rotable'));
+      cv.pred[m]+=q.length;cv.yr[e.year].p+=q.length;
+      q.forEach(r=>{if(r.cells[col]==='Repair')cv.rep++;else cv.rot++;if(r.fb==='Fcst')cv.fc++;else cv.bk++;});
+      const ym=cv.yr[e.year].m;ym[m]=ym[m]||{a:0,c:0};
+      if(e.mods[m]){
+        cv.atRisk[m]++;cv.yr[e.year].a++;ym[m].a++;
+        if(q.length){cv.cov[m]++;cv.yr[e.year].c++;ym[m].c++;}
+        else cv.unc.push({id:e.id,tech:e.sub,region:e.region,mod:m,col:col,year:e.year,why:rows.length?'DMR row(s) exist but module not predicted (or outside year / Fcst-Bklg filter)':'Engine has no DMR Handoff row'});
+      }
+    });
+  });
+  cv.A=MM.reduce((a,m)=>a+cv.atRisk[m],0);cv.P=MM.reduce((a,m)=>a+cv.pred[m],0);cv.Cv=MM.reduce((a,m)=>a+cv.cov[m],0);cv.gap=cv.A-cv.Cv;
+  C.cv=cv;return C;
+}
+
+/* ============================ RENDER TAB 1 ============================ */
+function render1(C){
+  const el=$('#t1');
+  if(!C.eng.length){el.innerHTML='<div class="empty">No engines match the current filters. Adjust the filters or press Reset.</div>';return;}
+  const H=C.hi.length,T=C.eng.length;
+  const kp=(l,v,s,tip,col)=>`<div class="card kpi" style="border-top-color:${col}" data-tip="${esc(tip)}"><div class="kl">${l}<span class="i">i</span></div><div class="kv">${v}</div><div class="ks">${s}</div></div>`;
+  let h='<div class="grid g5">'+
+    kp('Total engines',T,'in current filter','Count of unique ESNs in the UER sheet after filters (duplicates removed).',C_BLUE)+
+    kp('High-risk engines',H,pct(H,T)+'% of fleet in view','UER_Risk_Index > '+state.thr+' (threshold slider).',C_VM)+
+    kp('Actioned',C.act.length,pct(C.act.length,H)+'% of high-risk','High-risk AND Status in DMR is WIP or Ship\'d.',C_GR)+
+    kp('With upcoming event',C.upAll.length,pct(C.upAll.length,H)+'% of high-risk','High-risk AND Upcoming EE is not "'+NOEE+'". Can overlap with Actioned.',C_OR)+
+    kp('Blind spots',C.blind.length,pct(C.blind.length,H)+'% of high-risk','High-risk AND not WIP/Ship\'d AND no upcoming Equipment Event.',C.blind.length?C_VM:C_GR)+'</div>';
+
+  const bins=[];for(let b=0;b<10;b++){bins.push({l:b*10+'–'+(b*10+10),lo:0,hi:0});}
+  C.eng.forEach(e=>{const b=Math.min(9,Math.floor(e.risk/10));if(e.hi)bins[b].hi++;else bins[b].lo++;});
+  const histo=legend([['At or below threshold','#9fb3c8'],['High-risk (> threshold)',C_VM]])+vbar({labels:bins.map(b=>b.l),series:[{name:'At/below threshold',color:'#9fb3c8',values:bins.map(b=>b.lo)},{name:'High-risk',color:C_VM,values:bins.map(b=>b.hi)}],stacked:true,vline:state.thr});
+  const don=legend([['WIP',C_BLUE],["Ship'd",C_SKY]])+donut([{name:'WIP',v:C.wip,color:C_BLUE},{name:"Ship'd",v:C.ship,color:C_SKY}],C.act.length,'actioned engines');
+  h+='<div class="grid g21">'+card(`${H} of ${T} engines exceed the risk threshold of ${state.thr}`,histo,'Distribution of UER_Risk_Index in 10-point bins; dashed line is the adjustable threshold.')+
+     card(`${C.act.length} high-risk engines are already WIP or Ship'd`,don,`${C.wip} WIP · ${C.ship} Ship'd (Status in DMR)`)+'</div>';
+
+  const et=EE_TYPES.map(t=>C.upAll.filter(e=>e.ee===t).length);
+  const evt=hbar({labels:EE_TYPES,values:et,color:C_OR,lw:150,tips:EE_TYPES.map((t,i)=>t+': '+et[i]+' high-risk engines')});
+  const yc=[];C.yr.reduce((a,r)=>{yc.push(a+r.t);return a+r.t;},0);
+  const ychart=legend([['Actioned',C_BLUE],['Upcoming event only',C_OR],['Blind spot',C_VM],['Cumulative high-risk',C.nope||'#222']]) +
+    vbar({labels:C.yr.map(r=>String(r.y)),stacked:true,series:[{name:'Actioned',color:C_BLUE,values:C.yr.map(r=>r.a)},{name:'Upcoming event only',color:C_OR,values:C.yr.map(r=>r.u)},{name:'Blind spot',color:C_VM,values:C.yr.map(r=>r.b)}],line:{name:'Cumulative',color:'#222',values:yc,max:niceStep(Math.max(1,H)/4)*4}});
+  h+='<div class="grid g2">'+card(`${C.upAll.length} high-risk engines have an upcoming Equipment Event`,evt,'Split by event type (Upcoming EE column).')+
+     card('Execution years covered by the high-risk engines',ychart,'High-risk engines per Execution Year, stacked by DMR coverage segment, with cumulative line.')+'</div>';
+
+  const fl=['High-risk engines','Actioned (WIP / Ship\'d)','Not actioned','…with upcoming event','…blind spot (neither)'];
+  const fv=[H,C.act.length,C.notAct.length,C.upNot.length,C.blind.length];
+  const funnel=hbar({labels:fl,values:fv,colors:[C_VM,C_BLUE,'#8a99ab',C_OR,'#7a1f1f'],lw:170,vt:fv.map(v=>v+' ('+pct(v,H)+'%)'),tips:fl.map((l,i)=>l+': '+fv[i]+' ('+pct(fv[i],H)+'% of high-risk)')});
+  const techs=Array.from(new Set(C.eng.map(e=>e.sub))).sort(),regs=Array.from(new Set(C.eng.map(e=>e.region))).sort();
+  let hm=0;const grid=regs.map(r=>techs.map(t=>{const v=C.hi.filter(e=>e.region===r&&e.sub===t).length;hm=Math.max(hm,v);return v;}));
+  let ht='<div class="tw" style="max-height:none"><table class="hm"><thead><tr><th></th>'+techs.map(t=>`<th>${esc(t)}</th>`).join('')+'</tr></thead><tbody>';
+  regs.forEach((r,i)=>{ht+=`<tr><td class="rl">${esc(r)}</td>`+grid[i].map((v,j)=>{const k=hm?v/hm:0;return `<td style="background:rgba(0,114,178,${.07+.85*k});color:${k>.55?'#fff':'#1b2733'}" data-tip="${esc(r+' · '+techs[j]+': '+v+' high-risk engines')}">${v}</td>`;}).join('')+'</tr>';});
+  ht+='</tbody></table></div>';
+  h+='<div class="grid g2">'+card(`Only ${pct(C.blind.length,H)}% of high-risk engines are neither actioned nor scheduled`,funnel,'Flow from high-risk engines to blind spots.')+
+     card('Where the high-risk engines sit: Region × Technology',ht,'Count of high-risk engines; darker = more.')+'</div>';
+
+  const tm=UER_MODS.map(m=>({m,v:C.hi.filter(e=>e.top===m).length})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const tmc=tm.length?hbar({labels:tm.map(x=>x.m),values:tm.map(x=>x.v),color:C_PU,lw:60}):'<p class="note">No Top_Risk_Module values populated for the high-risk engines in view.</p>';
+  const rs=regs.map(r=>({r,t:C.eng.filter(e=>e.region===r).length,h:C.hi.filter(e=>e.region===r).length})).sort((a,b)=>pct(b.h,b.t)-pct(a.h,a.t));
+  const rsc=hbar({labels:rs.map(x=>x.r),values:rs.map(x=>pct(x.h,x.t)),color:C_BLUE,lw:90,vt:rs.map(x=>pct(x.h,x.t)+'% ('+x.h+'/'+x.t+')'),tips:rs.map(x=>x.r+': '+x.h+' of '+x.t+' engines high-risk')});
+  h+='<div class="grid g2">'+card('Top_Risk_Module most often driving the high-risk flag',tmc,'Frequency among high-risk engines.')+
+     card('High-risk share of fleet by region',rsc,'High-risk engines as % of engines in that region.')+'</div>';
+
+  const rows=C.hi.map(e=>({id:e.id,cust:e.cust,tech:e.sub,region:e.region,risk:e.risk,sev:e.sev,ovr:e.ovr,top:e.top,status:e.status,ee:e.ee,year:e.year,seg:e.seg}));
+  const cols=[{k:'id',t:'ESN (anonymized)'},{k:'cust',t:'Customer'},{k:'tech',t:'Technology'},{k:'region',t:'Region'},{k:'risk',t:'UER_Risk_Index',n:1,r:riskCell},{k:'sev',t:'Max_Eng_Sev',n:1},{k:'ovr',t:'Eng_Overall_risk',n:1},{k:'top',t:'Top_Risk_Module'},{k:'status',t:'Status in DMR'},{k:'ee',t:'Upcoming EE'},{k:'year',t:'Exec Year',n:1},{k:'seg',t:'Segment',r:segCell}];
+  h+=card('High-risk engine register (anonymized IDs)',tableHTML('t1',cols,rows),'Sortable. Risk index shaded by magnitude.');
+  el.innerHTML=h;
+}
+
+/* ============================ RENDER TAB 2 ============================ */
+function render2(C){
+  const el=$('#t2'),cv=C.cv;
+  if(!C.eng.length||!C.hi.length){el.innerHTML='<div class="empty">No high-risk engines match the current filters, so there are no at-risk modules to compare. Adjust the filters or lower the threshold.</div>';return;}
+  const cp=cv.A?pct(cv.Cv,cv.A):0;
+  let h='';
+  const vcls=cv.A===0?'v-mid':cv.gap===0?'v-ok':cp>=70?'v-mid':'v-bad';
+  const vtxt=cv.A===0?'No mapped at-risk modules in the current view.':cv.gap===0?'Demand prediction HAS covered all at-risk modules.':`Demand prediction HAS NOT fully covered at-risk modules: ${cv.gap} of ${cv.A} at-risk modules (${Math.round((100-cp)*10)/10}%) have no qualifying DMR prediction.`;
+  h+=`<div class="verdict ${vcls}">${vtxt}</div>`;
+  h+='<div class="grid g3">'+
+    card('Overall coverage',`<div style="font-size:34px;font-weight:700">${cp}%</div><div class="track"><div class="fill" style="width:${cp}%;background:${cp<40?'#d64545':cp<70?'#e8a33d':'#2e9e6b'}"></div></div><p class="note">${cv.Cv} covered of ${cv.A} at-risk modules (mapped modules only)</p>`,'Coverage % = covered at-risk modules ÷ at-risk modules.')+
+    card('Gap quantity',`<div style="font-size:34px;font-weight:700;color:${cv.gap?'#d64545':'#2e9e6b'}">${cv.gap}</div><p class="note">at-risk modules with no Repair/Rotable prediction (Execution Year &gt; ${state.pred}, Fcst or Bklg)</p>`,'')+
+    card('Predicted module quantity (DMR)',`<div style="font-size:34px;font-weight:700">${cv.P}</div><p class="note">Repair/Rotable cells on mapped modules for these engines, incl. modules not flagged at risk</p>`,'')+'</div>';
+
+  const mods=cv.MM;
+  const modPct=mods.map(m=>cv.atRisk[m]?pct(cv.cov[m],cv.atRisk[m]):null);
+  const mchart=legend([['At risk (UER)',C_BLUE],['Predicted (DMR)',C_OR],['Covered (at risk and predicted)',C_GR]])+
+    vbar({labels:mods.map(m=>m+' → '+MAP[m]),h:310,valLabels:true,topLabels:modPct.map(p=>p===null?'–':p+'%'),series:[{name:'At risk (UER)',color:C_BLUE,values:mods.map(m=>cv.atRisk[m])},{name:'Predicted (DMR)',color:C_OR,values:mods.map(m=>cv.pred[m])},{name:'Covered',color:C_GR,values:mods.map(m=>cv.cov[m])}]});
+  const unm=Object.keys(cv.unm).map(m=>m+' ('+cv.unm[m]+')').join(', ');
+  h+='<div class="grid">'+card('Quantity of modules at risk (UER) vs predicted (DMR Handoff), by module type',mchart,`Percent above each group = coverage. Unmapped UER modules excluded (no matching DMR heading): ${unm}.`)+'</div>';
+
+  const yrs=C.years;
+  const yp=yrs.map(y=>cv.yr[y].a?pct(cv.yr[y].c,cv.yr[y].a):0);
+  const ychart=legend([['At risk (UER)',C_BLUE],['Predicted (DMR)',C_OR],['Coverage %','#222']])+
+    vbar({labels:yrs.map(String),valLabels:true,series:[{name:'At risk (UER)',color:C_BLUE,values:yrs.map(y=>cv.yr[y].a)},{name:'Predicted (DMR)',color:C_OR,values:yrs.map(y=>cv.yr[y].p)}],line:{name:'Coverage',color:'#222',values:yp,max:100,suffix:'%'}});
+  let hm='<div class="tw" style="max-height:none"><table class="hm"><thead><tr><th>Module</th>'+yrs.map(y=>`<th>${y}</th>`).join('')+'<th>All</th></tr></thead><tbody>';
+  mods.forEach((m,i)=>{hm+=`<tr><td class="rl">${m} → ${esc(MAP[m])}</td>`+yrs.map(y=>{const c=cv.yr[y].m[m];const p=c&&c.a?pct(c.c,c.a):null;return `<td style="background:${cc(p)}" data-tip="${esc(m+' · '+y+': '+(c&&c.a?c.c+' of '+c.a+' covered':'no at-risk modules'))}">${p===null?'–':p+'%'}</td>`;}).join('')+`<td style="background:${cc(modPct[i])};font-weight:700">${modPct[i]===null?'–':modPct[i]+'%'}</td></tr>`;});
+  hm+='</tbody></table></div><div class="legend" style="margin-top:8px"><span><i style="background:#f5b5b0"></i>&lt;40%</span><span><i style="background:#fbe0a6"></i>40–69%</span><span><i style="background:#b5e3c8"></i>≥70%</span><span><i style="background:#f0f2f5"></i>no at-risk modules</span></div>';
+  h+='<div class="grid g2">'+card('Coverage by year: at-risk vs predicted modules',ychart,'Year = Execution Year of the engine in the UER sheet. Line = coverage % (right axis).')+
+     card('Coverage heatmap: module × year',hm,'Share of at-risk modules that have a qualifying DMR prediction.')+'</div>';
+
+  const rr=donut([{name:'Repair',v:cv.rep,color:C_BLUE},{name:'Rotable',v:cv.rot,color:C_PU}],cv.rep+cv.rot,'predicted cells');
+  const fb=donut([{name:'Fcst',v:cv.fc,color:C_GR},{name:'Bklg',v:cv.bk,color:C_OR}],cv.fc+cv.bk,'predicted cells');
+  h+='<div class="grid g2">'+card('Repair vs Rotable split of predicted modules',legend([['Repair',C_BLUE],['Rotable',C_PU]])+rr,'')+
+     card('Forecast vs Backlog split of predicted modules',legend([['Fcst',C_GR],['Bklg',C_OR]])+fb,'')+'</div>';
+
+  const cols=[{k:'id',t:'ESN (anonymized)'},{k:'tech',t:'Technology'},{k:'region',t:'Region'},{k:'mod',t:'UER module'},{k:'col',t:'DMR column'},{k:'year',t:'Exec Year',n:1},{k:'why',t:'Reason not covered'}];
+  h+=card(`${cv.unc.length} at-risk modules are not covered by the DMR prediction`,tableHTML('t2',cols,cv.unc),'Engine/module pairs flagged "Yes" in the UER with no qualifying Repair/Rotable cell in the DMR Handoff.');
+  el.innerHTML=h;
+}
+
+/* ============================ RENDER TAB 3 ============================ */
+function render3(C){
+  const el=$('#t3'),cv=C.cv,H=C.hi.length;
+  let h='';
+  let fnd='';
+  if(!C.eng.length||!H){fnd='<p class="note">No high-risk engines in the current view, so no findings can be generated.</p>';}
+  else{
+    const items=[];
+    items.push([C.blind.length,`${C.blind.length} of ${H} high-risk engines (${pct(C.blind.length,H)}%) are blind spots`,'They have no WIP/Ship\'d status and no upcoming Equipment Event. Review these first with account teams to confirm whether demand is missing from the plan.']);
+    const topEE=EE_TYPES.map(t=>({t,v:C.upAll.filter(e=>e.ee===t).length})).sort((a,b)=>b.v-a.v)[0];
+    items.push([C.act.length+C.upNot.length,`${C.act.length+C.upNot.length} of ${H} high-risk engines (${pct(C.act.length+C.upNot.length,H)}%) are actioned or scheduled`,`${C.act.length} are WIP/Ship'd and ${C.upNot.length} more have an upcoming event; the most common event type is ${topEE.t} (${topEE.v}). Execution is underway, so the focus shifts to timing and capacity.`]);
+    items.push([(cv.A?pct(cv.Cv,cv.A):0)+'%',`Module coverage is ${cv.A?pct(cv.Cv,cv.A):0}% (${cv.Cv} of ${cv.A} at-risk modules)`,`The DMR prediction leaves a gap of ${cv.gap} at-risk modules for Execution Year > ${state.pred}. Closing it would add that many module repairs/rotables to the plan.`]);
+    const wm=cv.MM.filter(m=>cv.atRisk[m]>0).map(m=>({m,p:pct(cv.cov[m],cv.atRisk[m]),a:cv.atRisk[m]})).sort((a,b)=>a.p-b.p||b.a-a.a)[0];
+    if(wm)items.push([wm.p+'%',`${wm.m} (${MAP[wm.m]}) has the weakest coverage at ${wm.p}% across ${wm.a} at-risk modules`,'Review whether the DMR under-forecasts this module type or whether the UER flag is too sensitive. Targeted module planning can raise coverage fastest here.']);
+    const py=C.yr.slice().sort((a,b)=>b.t-a.t)[0];
+    items.push([py.t,`${py.y} is the peak execution year with ${py.t} high-risk engines`,`${py.b} of them are blind spots. Shop-capacity and rotable-pool planning should be checked first for this year.`]);
+    fnd=items.slice(0,5).map(i=>`<div class="find"><div class="num">${esc(i[0])}</div><div><b>${esc(i[1])}</b><span>So what: ${esc(i[2])}</span></div></div>`).join('');
+  }
+  h+=card('Key findings (generated from the filtered data)',fnd,'Every number below is computed from the data in view, not typed by hand.');
+
+  const brows=C.blind.map(e=>({id:e.id,cust:e.cust,tech:e.sub,region:e.region,risk:e.risk,sev:e.sev,top:e.top,year:e.year,mods:UER_MODS.filter(m=>e.mods[m]).join(' ')}));
+  const bcols=[{k:'id',t:'ESN (anonymized)'},{k:'cust',t:'Customer'},{k:'tech',t:'Technology'},{k:'region',t:'Region'},{k:'risk',t:'UER_Risk_Index',n:1,r:riskCell},{k:'sev',t:'Max_Eng_Sev',n:1},{k:'top',t:'Top_Risk_Module'},{k:'mods',t:'Modules at risk'},{k:'year',t:'Exec Year',n:1}];
+  h+=card('Blind-spot engines (high-risk, not actioned, no upcoming event)','<p style="margin:0 0 8px"><button class="btn" id="exp">Download CSV (anonymized)</button></p>'+tableHTML('t3',bcols,brows),'Export contains anonymized IDs only.');
+
+  const tot=UERU.length,inD=UERU.filter(e=>DMRBY[e.id]).length;
+  const hiAll=UERU.filter(e=>e.risk>state.thr),hiD=hiAll.filter(e=>DMRBY[e.id]).length;
+  const nstat=UERU.filter(e=>e.status==='Not populated').length,ntop=UERU.filter(e=>e.top==='Not populated').length;
+  const prosp=DMR.filter(r=>r.fb==='Prospect').length;
+  const dq=`<ul class="chk">
+    <li>UER rows loaded: <b>${RAW.length}</b> · duplicate ESN rows removed: <b>${RAW.length-tot}</b> (rule: keep the row with the highest UER_Risk_Index) · unique engines: <b>${tot}</b></li>
+    <li>DMR Handoff rows: <b>${DMR.length}</b> · unique ESNs: <b>${Object.keys(DMRBY).length}</b></li>
+    <li>ESN match rate (UER engines found in DMR Handoff): <b>${pct(inD,tot)}%</b> (${inD}/${tot}) · high-risk engines found: <b>${pct(hiD,hiAll.length)}%</b> (${hiD}/${hiAll.length})</li>
+    <li>"Status in DMR" not populated: <b>${nstat}</b> engines · "Top_Risk_Module" not populated: <b>${ntop}</b> engines (shown as "Not populated", never imputed)</li>
+    <li>DMR rows with Fcst/ Bklg = "Prospect" (excluded from predictions): <b>${prosp}</b></li></ul>`;
+
+  const yrSum=C.yr.reduce((a,r)=>a+r.t,0);
+  const modSumY=Object.keys(cv.yr).reduce((a,y)=>a+cv.yr[y].a,0);
+  const histHi=C.eng.filter(e=>e.hi).length;
+  const checks=[
+    ['High-risk KPI = rows in register = sum of year bars = histogram above-threshold',H===C.hi.length&&H===yrSum&&H===histHi],
+    ['Actioned = WIP + Ship\'d',C.act.length===C.wip+C.ship],
+    ['Funnel: actioned + not actioned = high-risk',C.act.length+C.notAct.length===H],
+    ['Funnel: upcoming (not actioned) + blind spots = not actioned',C.upNot.length+C.blind.length===C.notAct.length],
+    ['Coverage: sum of module at-risk = sum of year at-risk',cv.A===modSumY],
+    ['Coverage: covered + gap = at-risk, and uncovered table rows = gap',cv.Cv+cv.gap===cv.A&&cv.unc.length===cv.gap],
+    ['Repair + Rotable = Fcst + Bklg = predicted quantity',cv.rep+cv.rot===cv.P&&cv.fc+cv.bk===cv.P]
+  ];
+  const rec='<ul class="chk">'+checks.map(c=>`<li><span class="${c[1]?'ok':'bad'}">${c[1]?'✔':'✘'}</span> ${c[0]}</li>`).join('')+'</ul>';
+  h+='<div class="grid g2">'+card('Data quality report',dq,'Computed on the full dataset (before filters).')+card('Reconciliation checks (live, under current filters)',rec,'All should show ✔.')+'</div>';
+
+  let mp='<div class="tw" style="max-height:none"><table><thead><tr><th>UER module</th><th>DMR Handoff column</th></tr></thead><tbody>'+UER_MODS.map(m=>`<tr><td>${m}</td><td>${MAP[m]?esc(MAP[m]):'<span style="color:#5f6b7a">Unmapped (excluded from coverage)</span>'}</td></tr>`).join('')+'</tbody></table></div><p class="note" style="margin-top:6px">DMR columns with no UER counterpart: '+DMR_COLS.filter(c=>!REV[c]).join(', ')+'. This mapping is an illustrative assumption for the demo and should be validated by a domain expert before use on real data.</p>';
+  const defs=`<dl class="defs">
+    <dt>High-risk engine</dt><dd>UER_Risk_Index &gt; threshold (default 50, adjustable).</dd>
+    <dt>Actioned</dt><dd>High-risk AND Status in DMR = WIP or Ship'd.</dd>
+    <dt>Upcoming event</dt><dd>High-risk AND Upcoming EE ≠ "${NOEE}".</dd>
+    <dt>Blind spot</dt><dd>High-risk, not actioned, and no upcoming event.</dd>
+    <dt>Module at risk</dt><dd>UER module cell = "Yes" for a high-risk engine.</dd>
+    <dt>Module predicted</dt><dd>Mapped DMR Handoff cell = "Repair" or "Rotable", Execution Year &gt; selected year (default 2026), and Fcst/ Bklg = "Fcst" or "Bklg".</dd>
+    <dt>Covered</dt><dd>An at-risk engine-module pair with at least one qualifying prediction for the same ESN and mapped module.</dd>
+    <dt>Coverage %</dt><dd>Covered ÷ at-risk, by module and by year (year = engine's UER Execution Year).</dd></dl>`;
+  h+='<div class="grid g2">'+card('Module mapping used',mp,'')+card('Definitions',defs,'')+'</div>';
+
+  h+=card('Assumptions, anonymization and limitations',`<ul class="chk">
+    <li><b>Synthetic data:</b> all rows are randomly generated with a fixed seed. The structure (sheet and column names, statuses, modules) mirrors the source workbook; no real values are included.</li>
+    <li><b>Anonymization:</b> ESNs are sequential 5-digit IDs (00000, 00001, …), consistent across UER and DMR. Customers appear as "Customer 001…". Comments, personnel names, SSO IDs, account-manager and opportunity/workflow identifiers are not included.</li>
+    <li><b>ESN matching:</b> in real data, ESNs are normalized (hyphens/spaces stripped) before matching, then replaced by IDs.</li>
+    <li><b>Quantities:</b> predicted quantity counts Repair/Rotable cells; "covered" counts at-risk module pairs, so coverage can never exceed 100%.</li>
+    <li><b>Limitation:</b> this demo file embeds its dataset and has no Excel upload, because a spreadsheet parser cannot be embedded without external libraries. Refreshing with real data requires a version that includes one.</li></ul>`,'');
+  el.innerHTML=h;
+  LAST=brows;
+  const b=$('#exp');if(b)b.onclick=()=>{
+    const head=['ESN_anonymized','Customer_anonymized','Technology','Region','UER_Risk_Index','Max_Eng_Sev','Top_Risk_Module','Modules_at_risk','Execution_Year'];
+    const lines=[head.join(',')].concat(LAST.map(r=>[r.id,r.cust,r.tech,r.region,r.risk,r.sev,r.top,'"'+r.mods+'"',r.year].join(',')));
+    const blob=new Blob([lines.join('\n')],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='blind_spot_engines_anonymized.csv';document.body.appendChild(a);a.click();a.remove();
+  };
+}
+
+/* ============================ WIRING ============================ */
+function render(){const C=compute();render1(C);render2(C);render3(C);}
+function opts(sel,vals,all){sel.innerHTML=(all?'<option value="All">All</option>':'')+vals.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');}
+function init(){
+  opts($('#fTech'),Array.from(new Set(UERU.map(e=>e.fam))).sort(),true);
+  opts($('#fReg'),Array.from(new Set(UERU.map(e=>e.region))).sort(),true);
+  opts($('#fStat'),Array.from(new Set(UERU.map(e=>e.status))).sort(),true);
+  const ys=Array.from(new Set(UERU.map(e=>e.year))).sort();
+  opts($('#fYear'),ys.map(String),true);
+  const py=[];for(let y=ys[0]-1;y<=ys[ys.length-1]-1;y++)py.push(String(y));
+  opts($('#fPred'),py,false);$('#fPred').value=String(state.pred);
+  $('#ts').textContent=new Date().toLocaleString();
+  const bind=(id,key,num)=>$(id).addEventListener(num?'input':'change',e=>{state[key]=num?+e.target.value:e.target.value;if(key==='pred')state.pred=+e.target.value;if(key==='thr')$('#thrv').textContent=state.thr;render();});
+  bind('#fTech','tech');bind('#fReg','region');bind('#fStat','status');bind('#fYear','year');bind('#fThr','thr',true);bind('#fPred','pred');
+  $('#reset').onclick=()=>{state.tech=state.region=state.status=state.year='All';state.thr=50;state.pred=2026;
+    ['#fTech','#fReg','#fStat','#fYear'].forEach(s=>$(s).value='All');$('#fThr').value=50;$('#thrv').textContent=50;$('#fPred').value='2026';render();};
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));$('#'+b.dataset.tab).classList.add('on');window.scrollTo(0,0);});
+  document.addEventListener('click',e=>{const th=e.target.closest('th[data-tbl]');if(!th)return;const s=SORT[th.dataset.tbl];const k=th.dataset.k;if(s.k===k)s.d*=-1;else{s.k=k;s.d=1;}render();});
+  const tip=$('#tip');
+  document.addEventListener('mousemove',e=>{const t=e.target.closest&&e.target.closest('[data-tip]');if(!t){tip.style.display='none';return;}
+    tip.textContent=t.getAttribute('data-tip');tip.style.display='block';
+    const x=Math.min(window.innerWidth-tip.offsetWidth-12,e.clientX+14),y=e.clientY+16+tip.offsetHeight>window.innerHeight?e.clientY-tip.offsetHeight-10:e.clientY+16;
+    tip.style.left=x+'px';tip.style.top=y+'px';});
+  render();
+}
+init();
+})();
+</script>
+</body>
+</html>
